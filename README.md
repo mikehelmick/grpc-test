@@ -14,4 +14,4 @@ And the client
 
 # Notes
 
-This does not do any king of gRPC authentication (yet).
+This does not do any king of gRPC authentication (*yet).
