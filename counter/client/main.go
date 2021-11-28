@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"sync"
 
 	"google.golang.org/grpc"
 
@@ -27,16 +28,25 @@ func main() {
 
 	ctx := context.Background()
 
-	for i := 0; i < 10; i++ {
-		request := &cpb.IncrementRequest{
-			Name: "counter",
-		}
-		result, err := client.Increment(ctx, request)
-		if err != nil {
-			log.Fatalf("error calling Increment: %v", err)
-		}
-		log.Printf("called increment: %+v", result)
+	wg := sync.WaitGroup{}
+	names := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
+	wg.Add(len(names))
+	for _, cname := range names {
+		cname := cname
+		go func() {
+			for i := 0; i < 10; i++ {
+				request := &cpb.IncrementRequest{
+					Name: cname,
+				}
+				result, err := client.Increment(ctx, request)
+				if err != nil {
+					log.Fatalf("error calling Increment: %v", err)
+				}
+				log.Printf("called increment: %+v", result)
+			}
+			wg.Done()
+		}()
 	}
 
-	conn.Close()
+	wg.Wait()
 }
